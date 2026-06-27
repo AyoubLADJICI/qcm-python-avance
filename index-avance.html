@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QCM Python avancé — Admission Master Génie Civil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F4EE;
+    --card:#FCFBF7;
+    --ink:#16314A;
+    --ink-soft:#4A6075;
+    --muted:#8A98A6;
+    --line:#DCD8CC;
+    --blue:#16314A;
+    --accent:#2C7A6B;
+    --accent-soft:#D6EAE5;
+    --green:#2E7D52;
+    --green-bg:#E4F1E8;
+    --red:#B23B3B;
+    --red-bg:#F6E3E1;
+    --code-bg:#10283D;
+    --code-ink:#E9EEF2;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:0 20px 80px;}
+
+  header{padding:48px 0 28px; border-bottom:1px solid var(--line);}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--accent); margin:0 0 12px;
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:34px;
+    line-height:1.12; margin:0 0 10px; letter-spacing:-.01em;
+  }
+  .sub{color:var(--ink-soft); font-size:15px; margin:0 0 18px; max-width:56ch;}
+  .meta{display:flex; gap:8px; flex-wrap:wrap;}
+  .chip{
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-soft);
+    background:var(--card); border:1px solid var(--line); border-radius:999px;
+    padding:5px 12px;
+  }
+  .chip.level{color:var(--accent); border-color:var(--accent); background:var(--accent-soft);}
+
+  .progress-rail{
+    position:sticky; top:0; z-index:5; background:var(--paper);
+    padding:14px 0 12px; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:14px;
+  }
+  .bar{flex:1; height:8px; background:var(--accent-soft); border-radius:999px; overflow:hidden;}
+  .bar>span{display:block; height:100%; width:0%; background:var(--accent); transition:width .35s ease;}
+  .bar-label{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-soft); white-space:nowrap;}
+
+  .q-card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:22px 24px; margin-top:18px;
+  }
+  .q-num{
+    font-family:'Space Grotesk',sans-serif; font-weight:600; color:var(--accent);
+    font-size:13px; letter-spacing:.05em;
+  }
+  .q-text{font-weight:500; font-size:17px; margin:6px 0 0; color:var(--ink);}
+  pre{
+    background:var(--code-bg); color:var(--code-ink);
+    font-family:'JetBrains Mono',monospace; font-size:13.5px; line-height:1.55;
+    padding:14px 16px; border-radius:8px; margin:14px 0 4px; overflow-x:auto;
+  }
+  .opts{display:grid; gap:9px; margin-top:14px;}
+  .opt{
+    display:flex; align-items:center; gap:12px; text-align:left;
+    font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--ink);
+    background:var(--card); border:1px solid var(--line); border-radius:8px;
+    padding:11px 15px; cursor:pointer; transition:border-color .15s, background .15s;
+    width:100%;
+  }
+  .opt:hover:not(.locked){border-color:var(--ink-soft);}
+  .opt .letter{
+    font-family:'Space Grotesk',sans-serif; font-weight:600; color:var(--muted);
+    width:18px; flex-shrink:0;
+  }
+  .opt.sel{border-color:var(--blue); background:#EEF1F4;}
+  .opt.sel .letter{color:var(--blue);}
+  .opt.locked{cursor:default;}
+  .opt.good{border-color:var(--green); background:var(--green-bg); color:var(--green);}
+  .opt.good .letter{color:var(--green);}
+  .opt.bad{border-color:var(--red); background:var(--red-bg); color:var(--red);}
+  .opt.bad .letter{color:var(--red);}
+  .opt .mark{margin-left:auto; font-family:'Space Grotesk',sans-serif; font-weight:700;}
+
+  .exp{
+    font-size:14px; color:var(--ink-soft); line-height:1.6;
+    margin-top:14px; padding:12px 15px; border-radius:8px;
+    background:var(--paper); border-left:3px solid var(--line);
+  }
+  .exp b.ok{color:var(--green);} .exp b.no{color:var(--red);} .exp b.skip{color:var(--muted);}
+
+  .actions{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:26px;}
+  button.cta{
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px;
+    color:#fff; background:var(--blue); border:none; border-radius:8px;
+    padding:12px 26px; cursor:pointer; transition:transform .1s, opacity .15s;
+  }
+  button.cta:hover{opacity:.92;}
+  button.cta:active{transform:scale(.98);}
+  button.ghost{
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px;
+    color:var(--blue); background:transparent; border:1px solid var(--line);
+    border-radius:8px; padding:12px 22px; cursor:pointer;
+  }
+  button.ghost:hover{border-color:var(--ink-soft);}
+
+  .result{
+    background:var(--blue); color:#fff; border-radius:var(--radius);
+    padding:26px 28px; margin-top:8px; display:none;
+  }
+  .result.show{display:block;}
+  .result .grade{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:42px; line-height:1;}
+  .result .grade small{font-size:20px; font-weight:500; opacity:.7;}
+  .result .line{font-size:14px; opacity:.85; margin-top:10px; font-family:'JetBrains Mono',monospace;}
+  .result .verdict{margin-top:14px; font-size:15px; line-height:1.55;}
+
+  footer{margin-top:48px; padding-top:20px; border-top:1px solid var(--line);
+    font-size:13px; color:var(--muted); text-align:center;}
+
+  .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
+  @media (max-width:520px){ h1{font-size:27px;} .q-card{padding:18px 16px;} }
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important; scroll-behavior:auto;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Python · Niveau avancé</p>
+    <h1>QCM Python — niveau avancé</h1>
+    <p class="sub">Trente questions au-delà des bases : compréhensions, slicing, dictionnaires, fonctions d'ordre supérieur et les pièges classiques de Python. Une réponse par question, correction détaillée et note finale.</p>
+    <div class="meta">
+      <span class="chip level">niveau 2 · avancé</span>
+      <span class="chip">30 questions</span>
+      <span class="chip">barème +1 / −0,25</span>
+    </div>
+  </header>
+
+  <div class="progress-rail">
+    <div class="bar"><span id="barFill"></span></div>
+    <span class="bar-label" id="barLabel">0 / 30</span>
+  </div>
+
+  <main id="quiz" aria-live="polite">
+    <h2 class="sr-only">Questionnaire Python avancé à choix multiples</h2>
+  </main>
+
+  <div class="result" id="result" aria-live="polite">
+    <div class="grade" id="grade"></div>
+    <div class="line" id="resLine"></div>
+    <div class="verdict" id="verdict"></div>
+  </div>
+
+  <div class="actions">
+    <button class="cta" id="submitBtn">Voir mon score</button>
+    <button class="ghost" id="resetBtn" style="display:none;">Recommencer</button>
+  </div>
+
+  <footer>Niveau avancé — ces questions trient les vrais réflexes Python.</footer>
+</div>
+
+<script>
+const QUESTIONS = [
+  {q:"Que renvoie ce programme ?", code:"L = [x*x for x in range(1, 5)]\nprint(L)", opts:["[1, 4, 9, 16]","[1, 2, 3, 4]","[0, 1, 4, 9]","[1, 4, 9, 16, 25]"], c:0, e:"Compréhension de liste : range(1,5) donne 1,2,3,4, élevés au carré → [1, 4, 9, 16]."},
+  {q:"Que renvoie ce programme ?", code:"L = [0, 1, 2, 3, 4, 5]\nprint(L[1:5:2])", opts:["[1, 3]","[1, 2, 3]","[1, 3, 5]","[2, 4]"], c:0, e:"L[début:fin:pas] = L[1:5:2] prend les indices 1 et 3 (5 exclu) → [1, 3]."},
+  {q:"Que renvoie ce programme ?", code:'s = "civil"\nprint(s[::-1])', opts:["civil","livic","cvl","Erreur"], c:1, e:"Le slice [::-1] parcourt la chaîne à l'envers → livic."},
+  {q:"Qu'affiche ce programme ?", code:'for i, v in enumerate(["a", "b", "c"]):\n    print(i, v)', opts:["a b c","0 a / 1 b / 2 c","1 a / 2 b / 3 c","0 1 2"], c:1, e:"enumerate donne (indice, valeur) : 0 a, puis 1 b, puis 2 c."},
+  {q:"Que renvoie ce programme ?", code:"a = [1, 2, 3]\nb = [10, 20, 30]\nprint([x + y for x, y in zip(a, b)])", opts:["[11, 22, 33]","[1, 2, 3, 10, 20, 30]","[11, 22]","Erreur"], c:0, e:"zip associe les éléments deux à deux : (1,10),(2,20),(3,30), additionnés → [11, 22, 33]."},
+  {q:"Que renvoie ce programme ?", code:'d = {"a": 1, "b": 2}\nprint(list(d.keys()))', opts:["[1, 2]","['a', 'b']","['a', 1, 'b', 2]","{'a', 'b'}"], c:1, e:"keys() renvoie les clés du dictionnaire, converties en liste → ['a', 'b']."},
+  {q:"Que renvoie ce programme ?", code:'d = {"x": 5}\nprint(d.get("y", 0))', opts:["5","None","0","Erreur"], c:2, e:"get renvoie la valeur de la clé, ou la valeur par défaut si la clé est absente. « y » n'existe pas → 0."},
+  {q:"Que renvoie ce programme ?", code:"s = {1, 2, 2, 3, 3, 3}\nprint(len(s))", opts:["6","3","1","2"], c:1, e:"Un set (ensemble) supprime les doublons : {1, 2, 3} → longueur 3."},
+  {q:"Que renvoie ce programme ?", code:"a, b = 1, 2\na, b = b, a\nprint(a, b)", opts:["1 2","2 1","1 1","2 2"], c:1, e:"a, b = b, a échange les deux valeurs en une ligne → a=2, b=1."},
+  {q:"Que renvoie ce programme ?", code:"L = [1, 2, 3]\nM = L\nM.append(4)\nprint(len(L))", opts:["3","4","1","Erreur"], c:1, e:"M = L ne copie pas : M et L pointent vers la même liste. L'ajout via M affecte L → len = 4."},
+  {q:"Que renvoie ce programme ?", code:"L = [1, 2, 3]\nM = L[:]\nM.append(4)\nprint(len(L))", opts:["3","4","0","Erreur"], c:0, e:"L[:] crée une vraie copie. Modifier M ne touche plus L → len(L) reste 3."},
+  {q:"Que renvoie ce programme ?", code:'s = "Genie Civil"\nprint(s.upper())', opts:["genie civil","Genie Civil","GENIE CIVIL","Genie civil"], c:2, e:"upper() met toute la chaîne en majuscules → GENIE CIVIL."},
+  {q:"Que renvoie ce programme ?", code:'s = "a,b,c"\nprint(s.split(","))', opts:["'abc'","['a', 'b', 'c']","['a,b,c']","['a' 'b' 'c']"], c:1, e:"split découpe la chaîne selon le séparateur et renvoie une liste → ['a', 'b', 'c']."},
+  {q:"Que renvoie ce programme ?", code:'L = ["a", "b", "c"]\nprint("-".join(L))', opts:["a-b-c","['a', 'b', 'c']","abc","a - b - c"], c:0, e:"join assemble les éléments d'une liste en une chaîne, séparés par « - » → a-b-c."},
+  {q:"Que renvoie ce programme ?", code:'x = 7\nprint("pair" if x % 2 == 0 else "impair")', opts:["pair","impair","True","7"], c:1, e:"Expression conditionnelle : 7 % 2 = 1 (≠ 0), donc la branche else → impair."},
+  {q:"Que renvoie ce programme ?", code:"f = lambda x: x * 2\nprint(f(5))", opts:["10","52","x*2","Erreur"], c:0, e:"lambda x: x*2 est une fonction anonyme. f(5) = 5 × 2 = 10."},
+  {q:"Que renvoie ce programme ?", code:"L = [1, 2, 3]\nprint(list(map(lambda x: x + 1, L)))", opts:["[1, 2, 3]","[2, 3, 4]","[1, 2, 3, 1]","6"], c:1, e:"map applique la fonction à chaque élément : +1 sur chacun → [2, 3, 4]."},
+  {q:"Que renvoie ce programme ?", code:"L = [1, 2, 3, 4, 5, 6]\nprint(list(filter(lambda x: x % 2 == 0, L)))", opts:["[1, 3, 5]","[2, 4, 6]","[True, False]","[1, 2, 3, 4, 5, 6]"], c:1, e:"filter garde les éléments pour lesquels la fonction est vraie (ici les pairs) → [2, 4, 6]."},
+  {q:"Qu'affiche la dernière ligne ?", code:"def ajoute(x, L=[]):\n    L.append(x)\n    return L\nprint(ajoute(1))\nprint(ajoute(2))", opts:["[2]","[1, 2]","[1]","Erreur"], c:1, e:"Piège classique : la liste par défaut est créée une seule fois et conservée entre les appels. Au 2e appel elle contient déjà 1 → [1, 2]."},
+  {q:"Que renvoie ce programme ?", code:"a = [1, 2]\nb = [1, 2]\nprint(a == b, a is b)", opts:["True True","True False","False False","False True"], c:1, e:"== compare les valeurs (égales → True). « is » compare l'identité en mémoire : deux listes distinctes → False."},
+  {q:"Que renvoie ce programme ?", code:"print(-7 // 2)", opts:["-3","-4","-3.5","3"], c:1, e:"// arrondit vers le bas (vers −∞), pas vers zéro : −7÷2 = −3,5 → −4."},
+  {q:"Que renvoie ce programme ?", code:"print(-7 % 3)", opts:["-1","2","1","-2"], c:1, e:"En Python le reste prend le signe du diviseur : −7 = 3×(−3) + 2, donc −7 % 3 = 2."},
+  {q:"Que renvoie ce programme ?", code:"M = [[1, 2], [3, 4]]\nprint(M[1][0])", opts:["1","2","3","4"], c:2, e:"M[1] est la 2e sous-liste [3, 4], puis [0] en prend le 1er élément → 3."},
+  {q:"Que renvoie ce programme ?", code:"print([x for x in range(10) if x % 3 == 0])", opts:["[0, 3, 6, 9]","[3, 6, 9]","[0, 1, 2, ...]","[3, 6]"], c:0, e:"Compréhension filtrée : les multiples de 3 entre 0 et 9 → [0, 3, 6, 9] (0 est multiple de 3)."},
+  {q:"Que renvoie ce programme ?", code:'name = "Civil"\nprint(f"Genie {name}")', opts:["Genie {name}","Genie Civil","f\"Genie Civil\"","Genie name"], c:1, e:"Une f-string remplace {name} par la valeur de la variable → Genie Civil."},
+  {q:"Qu'affiche ce programme ?", code:'try:\n    print(10 / 0)\nexcept ZeroDivisionError:\n    print("erreur")', opts:["inf","erreur","0","plantage du programme"], c:1, e:"La division par zéro lève ZeroDivisionError, capturée par except → affiche « erreur »."},
+  {q:"Que renvoie ce programme ?", code:'L = ["bb", "a", "ccc"]\nprint(sorted(L, key=len))', opts:["['a', 'bb', 'ccc']","['bb', 'a', 'ccc']","['ccc', 'bb', 'a']","['a', 'ccc', 'bb']"], c:0, e:"key=len trie selon la longueur de chaque chaîne : 1, 2, 3 → ['a', 'bb', 'ccc']."},
+  {q:"Que renvoie ce programme ?", code:"print(sum(range(1, 101)))", opts:["100","5000","5050","10000"], c:2, e:"Somme des entiers de 1 à 100 : 100×101/2 = 5050."},
+  {q:"Que renvoie ce programme ?", code:"print(True + True + False)", opts:["TrueTrueFalse","2","1","Erreur"], c:1, e:"Les booléens valent 1 (True) et 0 (False) en calcul : 1 + 1 + 0 = 2."},
+  {q:"Que renvoie ce programme ?", code:"d = {x: x**2 for x in range(1, 4)}\nprint(d)", opts:["{1: 1, 2: 4, 3: 9}","[1, 4, 9]","{1, 4, 9}","{1: 2, 2: 4, 3: 6}"], c:0, e:"Compréhension de dictionnaire : chaque x devient une clé associée à son carré → {1: 1, 2: 4, 3: 9}."}
+];
+
+const state = Array(QUESTIONS.length).fill(null);
+let graded = false;
+const quiz = document.getElementById('quiz');
+const barFill = document.getElementById('barFill');
+const barLabel = document.getElementById('barLabel');
+const submitBtn = document.getElementById('submitBtn');
+const resetBtn = document.getElementById('resetBtn');
+const resultEl = document.getElementById('result');
+const N = QUESTIONS.length;
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function render(){
+  quiz.innerHTML = '<h2 class="sr-only">Questionnaire Python avancé à choix multiples</h2>';
+  QUESTIONS.forEach((item, qi) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    let html = '<div class="q-num">Question ' + (qi+1) + ' / ' + N + '</div>';
+    html += '<p class="q-text">' + esc(item.q) + '</p>';
+    if(item.code) html += '<pre>' + esc(item.code) + '</pre>';
+    html += '<div class="opts">';
+    item.opts.forEach((opt, oi) => {
+      let cls = 'opt';
+      let mark = '';
+      if(graded){
+        cls += ' locked';
+        if(oi === item.c){ cls += ' good'; mark = '<span class="mark">✓</span>'; }
+        else if(state[qi] === oi){ cls += ' bad'; mark = '<span class="mark">✗</span>'; }
+      } else if(state[qi] === oi){ cls += ' sel'; }
+      html += '<button class="' + cls + '" data-q="' + qi + '" data-o="' + oi + '">' +
+              '<span class="letter">' + String.fromCharCode(65+oi) + '</span>' +
+              '<span>' + esc(opt) + '</span>' + mark + '</button>';
+    });
+    html += '</div>';
+    if(graded){
+      const ok = state[qi] === item.c;
+      let tag = ok ? '<b class="ok">Correct.</b> '
+              : (state[qi] === null ? '<b class="skip">Non répondu.</b> ' : '<b class="no">Faux.</b> ');
+      html += '<div class="exp">' + tag + esc(item.e) + '</div>';
+    }
+    card.innerHTML = html;
+    quiz.appendChild(card);
+  });
+  if(!graded){
+    quiz.querySelectorAll('.opt').forEach(b => {
+      b.addEventListener('click', () => {
+        state[+b.dataset.q] = +b.dataset.o;
+        render(); updateBar();
+      });
+    });
+  }
+}
+
+function updateBar(){
+  const n = state.filter(x => x !== null).length;
+  barFill.style.width = (n / N * 100) + '%';
+  barLabel.textContent = n + ' / ' + N;
+}
+
+submitBtn.addEventListener('click', () => {
+  graded = true;
+  let good = 0, bad = 0;
+  state.forEach((a, i) => { if(a === null) return; a === QUESTIONS[i].c ? good++ : bad++; });
+  const pts = good - bad * 0.25;
+  const note = Math.max(0, pts / N * 20);
+  document.getElementById('grade').innerHTML = note.toFixed(1) + '<small>/20</small>';
+  document.getElementById('resLine').textContent =
+    good + ' bonnes · ' + bad + ' fausses · ' + (N - good - bad) + ' sans réponse — ' + pts.toFixed(2) + ' pts au barème';
+  let v;
+  if(note >= 16) v = "Très bon niveau avancé — tu maîtrises les subtilités, pièges inclus.";
+  else if(note >= 12) v = "Bon niveau. Revois surtout les pièges (alias de listes, modulo négatif, argument par défaut) et ce sera complet.";
+  else if(note >= 8) v = "L'avancé demande encore du travail. Reprends chaque correction : ce sont des réflexes qui s'acquièrent vite.";
+  else v = "Ce niveau est exigeant — repars des compréhensions, du slicing et des dictionnaires, puis reviens sur les pièges.";
+  document.getElementById('verdict').textContent = v;
+  resultEl.classList.add('show');
+  submitBtn.style.display = 'none';
+  resetBtn.style.display = 'inline-flex';
+  render();
+  resultEl.scrollIntoView({behavior:'smooth', block:'center'});
+});
+
+resetBtn.addEventListener('click', () => {
+  for(let i=0;i<N;i++) state[i] = null;
+  graded = false;
+  resultEl.classList.remove('show');
+  submitBtn.style.display = 'inline-flex';
+  resetBtn.style.display = 'none';
+  render(); updateBar();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+render();
+updateBar();
+</script>
+</body>
+</html>
